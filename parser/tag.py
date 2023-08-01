@@ -1,11 +1,8 @@
-from typing import List
-
-
 class Tag:
     def __init__(self) -> None:
         self._name : str
-        self._attributes : dict
-        self._text = ""
+        self._attributes = {}
+        self._content = ""
         self._children_tags = []
 
     # Next lines will create a getter and a setter for each variable
@@ -20,8 +17,8 @@ class Tag:
         return self._attributes
     
     @property
-    def text(self):
-        return self._text
+    def content(self):
+        return self._content
     
     @property
     def children_tags(self):
@@ -35,15 +32,12 @@ class Tag:
     
     @attributes.setter
     def attributes(self, attrs : dict):
-        self._attributes = attrs
+        self._attributes.update(attrs)
     
-    @text.setter
+    @content.setter
     def text(self, value : str):
-        self._text += value
+        self._content += value
         
     @children_tags.setter
     def children_tags(self, value):
         self._children_tags.append(value)
-
-
-tags_waiting_for_being_closed : List[Tag] = []
