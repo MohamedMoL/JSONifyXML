@@ -1,5 +1,5 @@
 import paths
-from os.path import getsize
+from get_file_size import get_size
 from file_opener import open_xml_file
 from validator import Validator
 from interpreter import Interpreter
@@ -11,7 +11,8 @@ def main():
     time_start = perf_counter() # Starts time measurement
 
     # --------------------- File working --------------------- #
-    file_path = paths.get_example_route("example01.xml")
+    file_name = "example01_large"
+    file_path = paths.get_example_route(f"{file_name}.xml")
     xml = open_xml_file(file_path)
 
     # --------------------- Validator working --------------------- #
@@ -21,16 +22,20 @@ def main():
     # --------------------- Interpreter working --------------------- #
     interpreter = Interpreter()
     root_tag = interpreter.parse_xml_to_python_object(xml_tags_and_contents, validator)
-    litle_parsed_obj = interpreter.parse_python_object_to_json(root_tag)
+    json = interpreter.parse_python_object_to_json(root_tag)
+
+    # --------------------- JSON --------------------- #
+    with open(f"{file_name}.json", "w") as file:
+        file.write(json)
 
     time_end = perf_counter() # Ends time measurement
-
+    
     # --------------------- Prints file size + time spend --------------------- #
-    # file_size = [getsize(file_path), "Bytes"] # Byte
-    # file_size_KB = [file_size[0] * 0.001, "Kilobytes"] # Kilobyte
-    # file_size_MB = [file_size[0] * 0.000_001, "Megabytes"] # Megabyte
-    # print(f"File size: {file_size_KB[0]} {file_size_KB[1]}")
-    print(f"This lasts:\n{(time_end - time_start) * 1000} ms\n{time_end - time_start} s")
+    file_size = get_size(file_path)
+    print(f"File size: {file_size[0]:.3f} {file_size[1]}")
+
+    time = time_end - time_start
+    print(f"This lasts:\n{(time * 1000):.5f} ms\n{time:.5f} s")
 
 
 if __name__ == "__main__":

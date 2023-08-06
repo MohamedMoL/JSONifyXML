@@ -3,11 +3,12 @@ class Tag:
         self._name : str
         self._attributes = {}
         self._content = ""
-        self._children_tags = []
+        self._parent_index : int
 
-    # Next lines will create a getter and a setter for each variable
+    def __str__(self) -> str:
+        return self.name
+
     # ---------------------- Getters ---------------------- #
-
     @property
     def name(self):
         return self._name
@@ -21,11 +22,10 @@ class Tag:
         return self._content
     
     @property
-    def children_tags(self):
-        return self._children_tags
+    def parent_index(self):
+        return self._parent_index
     
     # ---------------------- Setters ---------------------- #
-    
     @name.setter
     def name(self, value : str):
         self._name = value
@@ -35,9 +35,9 @@ class Tag:
         self._attributes.update(attrs)
     
     @content.setter
-    def text(self, value : str):
+    def content(self, value : str):
         self._content += value
-        
-    @children_tags.setter
-    def children_tags(self, value):
-        self._children_tags.append(value)
+
+    @parent_index.setter
+    def parent_index(self, value : int):
+        self._parent_index = value

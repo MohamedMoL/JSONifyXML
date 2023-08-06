@@ -1,9 +1,7 @@
 class LiFo:
 
-    default_value = "floor"
-
     def __init__(self) -> None:
-        self.array = [self.default_value]
+        self.array = ["floor"] # 'Floor' is used as default value for the first value of the array. It is not important
 
     def pop(self) -> None:
         self.array.pop()
