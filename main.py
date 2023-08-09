@@ -1,9 +1,9 @@
 import paths
 from get_file_size import get_size
 from file_opener import open_xml_file
-from validator import Validator
-from interpreter import Interpreter
 from tag import *
+from xml_parse_to_json import xml_parse_to_json
+from create_json import create_json
 from time import perf_counter # Test performance purpose
 
 
@@ -15,18 +15,9 @@ def main():
     file_path = paths.get_example_route(f"{file_name}.xml")
     xml = open_xml_file(file_path)
 
-    # --------------------- Validator working --------------------- #
-    validator = Validator()
-    xml_tags_and_contents = validator.validate_xml(xml)
+    json_string = xml_parse_to_json(xml)
 
-    # --------------------- Interpreter working --------------------- #
-    interpreter = Interpreter()
-    root_tag = interpreter.parse_xml_to_python_object(xml_tags_and_contents, validator)
-    json = interpreter.parse_python_object_to_json(root_tag)
-
-    # --------------------- JSON --------------------- #
-    with open(f"{file_name}.json", "w") as file:
-        file.write(json)
+    create_json(json_string, file_name)
 
     time_end = perf_counter() # Ends time measurement
     

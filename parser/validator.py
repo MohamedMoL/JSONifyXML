@@ -1,5 +1,5 @@
 from find_all_chars import find_all_chars
-from tag import *
+from .tag import *
 from typing import Iterator
 
 class Validator:
@@ -19,7 +19,7 @@ class Validator:
         inside_tag_information = tag[1:-1].split(" ") # Ignores ">" and "<", and separates name and attributes
         tag_name = ""
         tag_attrs = {}
-        if inside_tag_information[0][0] == "!": # It is a commentary
+        if inside_tag_information[0][0] == "!" or inside_tag_information[0][0] == "?": # It is a commentary or a "xml" tag
             return [tag_name, tag_attrs]
 
         # Next lines will interpret tag's attributes and save them as key-value pairs

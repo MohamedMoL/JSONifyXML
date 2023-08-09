@@ -1,17 +1,13 @@
-from tag import *
-from validator import Validator
+from .tag import *
+from .validator import Validator
 from lifo import LiFo
 from typing import Dict
-from copy import deepcopy
 
 
 class Interpreter:
 
     # ---------------------- Public Methods ---------------------- #
     def parse_xml_to_python_object(self, tags_and_contents : list, validator : Validator) -> Dict[int, list]:
-        if tags_and_contents[0][1] == "?": # Ignore xml tag, at this moment it's useless
-            del tags_and_contents[0]
-
         tags_LiFo = LiFo()
 
         tags_hierarchy : Dict[int, list] = {} # This dict will contain all xml's information
@@ -23,7 +19,8 @@ class Interpreter:
             if element[0] == "<": # It is tag
                 current_tag_name, current_tag_attrs = validator.validate_tag(element)
                 
-                if current_tag_name: # If this doesn't meet, it is a commentary (should skip)
+                # This conditional will see if the tag starts with "!" or "?"
+                if current_tag_name: 
 
                     if not current_tag_name[0] == "/": # Tag is opening
                         
@@ -52,27 +49,14 @@ class Interpreter:
         return tags_hierarchy
     
     def parse_python_object_to_json(self, obj : Dict[int, list[Tag]]) -> str:
+        
+        # ----------------------- WARNING ----------------------- #
+        # This method modifies the item 'obj' (given as parameter)
+        # It is a BAD practise. So far, there is no alternatives which does not sacrify the performance
+
+        self.__move_data_between_tags(obj)
+
         json_str = "{"
-        reversed_keys_obj = list(obj.keys())[::-1]
-        for level in reversed_keys_obj:
-            if level > 1: # Parent tag. Level 1 is different from others
-                for tag in obj[level]:
-                    
-                    parent_attrs : Dict[str, list] = obj[level - 1][tag.parent_index].attributes
-                    current_tag_name = parent_attrs.get(tag.name, False)
-                    
-                    if current_tag_name and (type(current_tag_name) != list): # The key exists, but there is only one tag
-                        parent_attrs[tag.name] = [parent_attrs[tag.name]]
-                    
-                    if current_tag_name: # The key exists and the value is a list (there is minimum two tags)
-                        parent_attrs[tag.name].append(tag)
-
-                    if tag.content and (not tag.attributes) and (not current_tag_name): # Tags without children and attributes
-                        parent_attrs.update({tag.name : tag.content})
-                    
-                    elif not current_tag_name: # The key does not exist
-                        parent_attrs[tag.name] = tag
-
         for tags in obj[1]:
             json_str += f'"{tags.name}"' + ":{"
             for key, value in tags.attributes.items():
@@ -127,4 +111,29 @@ class Interpreter:
         slice_of_json = slice_of_json[:-1]
         slice_of_json += "}"
         return slice_of_json
-            
+    
+    def __move_data_between_tags(self, obj : Dict[int, list[Tag]]) -> None:
+        reversed_keys_obj = list(obj.keys())[::-1]
+        reversed_keys_obj.remove(1) # level 1 is unnecesary to be iterated in the next loop
+        
+        for level in reversed_keys_obj:
+            for tag in obj[level]:
+
+                parent_attrs : Dict[str, list] = obj[level - 1][tag.parent_index].attributes
+                current_tag_name = parent_attrs.get(tag.name, False)
+
+                if tag.content and tag.attributes: # Tags with content and attributes
+                    tag.attributes = {"_content" : tag.content}
+                    
+                if current_tag_name and (type(current_tag_name) == list): # Key: exists - Value: list (there is minimum two tags)
+                    parent_attrs[tag.name].append(tag)
+                
+                elif current_tag_name and (type(current_tag_name) != list): # Key: exists - Value: Tag
+                    parent_attrs[tag.name] = [parent_attrs[tag.name], tag]
+
+                elif tag.content and (not tag.attributes) and (not current_tag_name): # Tags without children and attributes
+                    parent_attrs.update({tag.name : tag.content})
+                    
+                elif not current_tag_name: # The key does not exist
+                    parent_attrs[tag.name] = tag
+                    
