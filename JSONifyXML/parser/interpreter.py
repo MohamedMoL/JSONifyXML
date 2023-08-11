@@ -1,6 +1,6 @@
 from .tag import *
 from .validator import Validator
-from lifo import LiFo
+from .helpers.lifo import LiFo
 from typing import Dict
 
 
@@ -20,33 +20,38 @@ class Interpreter:
                 current_tag_name, current_tag_attrs = validator.validate_tag(element)
                 
                 # This conditional will see if the tag starts with "!" or "?"
-                if current_tag_name: 
+                if not current_tag_name:
+                    continue
 
-                    if not current_tag_name[0] == "/": # Tag is opening
+                if not current_tag_name[0] == "/": # Tag is opening
                         
-                        current_level = len(tags_LiFo.array)
+                    current_level = len(tags_LiFo.array)
 
-                        current_tag = self.__update_tag(
-                            tags_hierarchy, current_tag_name, 
-                            current_tag_attrs, current_level
-                        )
+                    # Create the current tag and update it with its name, attributes and level
+                    current_tag = self.__update_tag(
+                        tags_hierarchy, current_tag_name, 
+                        current_tag_attrs, current_level
+                    )
 
-                        tags_LiFo.push(current_tag)
+                    tags_LiFo.push(current_tag)
                         
-                        if not tags_hierarchy.get(current_level):
-                            tags_hierarchy[current_level] = []
+                    if not tags_hierarchy.get(current_level):
+                        tags_hierarchy[current_level] = []
 
-                        tags_hierarchy[current_level].append(current_tag)
+                    tags_hierarchy[current_level].append(current_tag)
                         
-                    else: # Tag is closing
-                        if current_tag_name[1::] != tags_LiFo.array[-1].name:
-                            raise Exception("Different tag name when it's closing")
-                        tags_LiFo.pop()
+                else: # Tag is closing
+                    if current_tag_name[1::] != tags_LiFo.array[-1].name:
+                        raise Exception("Different tag name when it's closing")
+                    tags_LiFo.pop()
 
             else: # It is content
                 current_tag.content = element
         
-        return tags_hierarchy
+        if len(tags_LiFo.array) == 1:
+            return tags_hierarchy
+        else:
+            raise Exception("Number of opening and closing tags are not the same")
     
     def parse_python_object_to_json(self, obj : Dict[int, list[Tag]]) -> str:
         

@@ -1,4 +1,4 @@
-from find_all_chars import find_all_chars
+from .helpers.find_all_chars import find_all_chars
 from .tag import *
 from typing import Iterator
 

@@ -1,9 +1,8 @@
 import paths
-from get_file_size import get_size
-from file_opener import open_xml_file
-from tag import *
+from helpers.get_file_size import get_size
+from helpers.file_opener import open_xml_file
+from helpers.create_json import create_json
 from xml_parse_to_json import xml_parse_to_json
-from create_json import create_json
 from time import perf_counter # Test performance purpose
 
 
